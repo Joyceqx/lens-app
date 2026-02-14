@@ -3,6 +3,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { COMPARISON_QUESTIONS, ONBOARDING_QUESTIONS } from '@/lib/constants';
 import { z } from 'zod';
 
+export const maxDuration = 30;
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });

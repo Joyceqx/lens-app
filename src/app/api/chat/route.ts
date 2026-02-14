@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { chatWithPersona } from '@/lib/claude';
 
+export const maxDuration = 30;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

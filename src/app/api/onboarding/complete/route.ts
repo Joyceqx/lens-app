@@ -4,6 +4,9 @@ import { extractPersona } from '@/lib/claude';
 import { ONBOARDING_QUESTIONS } from '@/lib/constants';
 import { z } from 'zod';
 
+// Extend Vercel serverless timeout (free tier: 60s, pro: 300s)
+export const maxDuration = 60;
+
 // Accept answers directly from the frontend — Supabase is optional
 const completeSchema = z.object({
   contributor_id: z.string().optional(),
@@ -55,16 +58,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No responses found — please answer at least one question' }, { status: 400 });
     }
 
-    // Extract persona via Claude API
+    // Extract persona via Claude API (with one retry)
     let extraction;
     try {
       extraction = await extractPersona(enrichedResponses);
-    } catch (llmError: any) {
-      console.error('LLM extraction failed:', llmError);
-      return NextResponse.json({
-        error: 'Persona extraction failed',
-        detail: llmError?.message || 'Unknown error',
-      }, { status: 500 });
+    } catch (firstError: any) {
+      console.error('LLM extraction failed (attempt 1):', firstError?.message || firstError);
+      // Retry once
+      try {
+        extraction = await extractPersona(enrichedResponses);
+      } catch (retryError: any) {
+        console.error('LLM extraction failed (attempt 2):', retryError?.message || retryError);
+        const msg = retryError?.message || firstError?.message || 'Unknown error';
+        return NextResponse.json({
+          error: `Persona extraction failed: ${msg}`,
+        }, { status: 500 });
+      }
     }
 
     // Save to Supabase and auto-publish so it appears in the library
