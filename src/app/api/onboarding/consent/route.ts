@@ -7,9 +7,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validated = onboardingConsentSchema.parse(body);
     
-    // Get the authenticated user (if any)
     const user = await getAuthUser();
-
     const supabase = createAdminClient();
 
     const { data, error } = await supabase

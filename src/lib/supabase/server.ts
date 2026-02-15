@@ -21,7 +21,6 @@ export function createServerClient() {
 }
 
 // Cookie-based auth client for server components and API routes
-// Reads the user's auth session from cookies
 export async function createAuthClient() {
   const cookieStore = await cookies();
 
@@ -39,8 +38,7 @@ export async function createAuthClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // setAll can fail in Server Components (read-only).
-            // This is fine — middleware will handle the refresh.
+            // setAll can fail in Server Components (read-only)
           }
         },
       },
