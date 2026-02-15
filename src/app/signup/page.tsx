@@ -1,28 +1,17 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, Mail, Lock, Loader2, CheckCircle } from 'lucide-react';
+import { Eye, Mail, Lock, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignupPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#0f0b2e] via-[#1a1545] to-[#0f0b2e]" />}>
-      <SignupForm />
-    </Suspense>
-  );
-}
-
-function SignupForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/';
 
   const supabase = createClient();
 
@@ -37,12 +26,9 @@ function SignupForm() {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
     });
 
     if (error) {
@@ -51,7 +37,15 @@ function SignupForm() {
       return;
     }
 
-    setSuccess(true);
+    // With email confirmation disabled, session is created immediately
+    if (data.session) {
+      router.push('/');
+      router.refresh();
+      return;
+    }
+
+    // Session not created (shouldn't happen with confirmation disabled)
+    setError('Something went wrong. Please try again.');
     setLoading(false);
   }
 
@@ -60,30 +54,10 @@ function SignupForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) setError(error.message);
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0f0b2e] via-[#1a1545] to-[#0f0b2e] flex items-center justify-center px-4">
-        <div className="w-full max-w-md text-center">
-          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
-          <p className="text-white/50 mb-4">
-            We sent a confirmation link to <span className="text-white">{email}</span>. Click the link to activate your account.
-          </p>
-          <p className="text-amber-400/80 text-sm mb-6">
-            Can&apos;t find it? Check your spam or junk folder — it often ends up there.
-          </p>
-          <Link href="/" className="text-accent hover:text-accent-hover transition text-sm">
-            Back to homepage
-          </Link>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -168,7 +142,7 @@ function SignupForm() {
 
           <p className="text-white/40 text-sm text-center mt-6">
             Already have an account?{' '}
-            <Link href={`/login?next=${encodeURIComponent(next)}`} className="text-accent hover:text-accent-hover transition">
+            <Link href="/login" className="text-accent hover:text-accent-hover transition">
               Sign in
             </Link>
           </p>

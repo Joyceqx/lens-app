@@ -47,7 +47,7 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) setError(error.message);
@@ -134,7 +134,7 @@ function LoginForm() {
 
           <p className="text-white/40 text-sm text-center mt-6">
             Don&apos;t have an account?{' '}
-            <Link href={`/signup?next=${encodeURIComponent(next)}`} className="text-accent hover:text-accent-hover transition">
+            <Link href="/signup" className="text-accent hover:text-accent-hover transition">
               Sign up
             </Link>
           </p>
