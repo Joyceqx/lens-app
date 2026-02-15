@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, getAuthUser } from '@/lib/supabase/server';
 
 // Always fetch fresh stats, never cache
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const supabase = createAdminClient();
+  const user = await getAuthUser();
 
   // Each query wrapped individually so one failure doesn't break all stats
   let personaCount = 0;
@@ -14,10 +15,12 @@ export async function GET() {
   let avgLatency = 0;
 
   try {
-    const { count } = await supabase
+    let query = supabase
       .from('persona_profiles')
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
+    if (user) query = query.eq('user_id', user.id);
+    const { count } = await query;
     personaCount = count || 0;
   } catch { /* table may not exist */ }
 

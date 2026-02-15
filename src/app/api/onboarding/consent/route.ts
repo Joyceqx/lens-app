@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, getAuthUser } from '@/lib/supabase/server';
 import { onboardingConsentSchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
@@ -7,12 +7,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validated = onboardingConsentSchema.parse(body);
     
+    // Get the authenticated user (if any)
+    const user = await getAuthUser();
+
     const supabase = createAdminClient();
-    
+
     const { data, error } = await supabase
       .from('contributors')
       .insert({
         consent_status: validated.consent ? 'granted' : 'declined',
+        user_id: user?.id || null,
       })
       .select('id, consent_status, created_at')
       .single();

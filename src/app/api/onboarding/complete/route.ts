@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, getAuthUser } from '@/lib/supabase/server';
 import { extractPersona } from '@/lib/claude';
 import { ONBOARDING_QUESTIONS } from '@/lib/constants';
 import { z } from 'zod';
@@ -76,6 +76,9 @@ export async function POST(request: Request) {
       }
     }
 
+    // Get the authenticated user to link persona to their account
+    const user = await getAuthUser();
+
     // Save to Supabase and auto-publish so it appears in the library
     let personaId = null;
     try {
@@ -84,6 +87,7 @@ export async function POST(request: Request) {
         .from('persona_profiles')
         .insert({
           contributor_id: validated.contributor_id || null,
+          user_id: user?.id || null,
           narrative: extraction.narrative,
           attributes_json: extraction.attributes,
           confidence_scores: extraction.confidence_scores,

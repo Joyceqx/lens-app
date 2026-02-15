@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Users, MessageSquare, BarChart3, Shield, Sparkles, Eye } from 'lucide-react';
+import { ArrowRight, Users, MessageSquare, BarChart3, Shield, Sparkles, Eye, LogOut } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 export default function LandingPage() {
+  const { user, loading, signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
@@ -17,15 +19,34 @@ export default function LandingPage() {
             <span className="text-xl font-semibold tracking-tight">Lens</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/onboarding" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Contribute
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-sm bg-accent text-white px-4 py-2 rounded-full hover:bg-accent-hover transition"
-            >
-              Open App
-            </Link>
+            {!loading && user ? (
+              <>
+                <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900 transition">
+                  Dashboard
+                </Link>
+                <Link href="/onboarding" className="text-sm text-gray-600 hover:text-gray-900 transition">
+                  Create Persona
+                </Link>
+                <button
+                  onClick={signOut}
+                  className="text-sm text-gray-400 hover:text-gray-600 transition flex items-center gap-1"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </>
+            ) : !loading ? (
+              <>
+                <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900 transition">
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="text-sm bg-accent text-white px-4 py-2 rounded-full hover:bg-accent-hover transition"
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       </nav>

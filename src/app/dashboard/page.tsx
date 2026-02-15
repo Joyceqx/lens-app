@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Users, MessageSquare, Clock, Activity, ArrowRight, ChevronRight, BarChart3 } from 'lucide-react';
+import { Eye, Users, MessageSquare, Clock, Activity, ArrowRight, ChevronRight, BarChart3, LogOut } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 
 interface Stats { total_personas: number; total_sessions: number; total_messages: number; avg_latency_ms: number; }
 
 export default function DashboardPage() {
+  const { user, signOut } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [personas, setPersonas] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +29,14 @@ export default function DashboardPage() {
             <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${item.active ? 'bg-accent-light text-accent font-medium' : 'text-gray-500 hover:bg-gray-50'}`}><item.icon className="w-4 h-4" />{item.label}</Link>
           ))}
         </nav>
+        {user && (
+          <div className="border-t border-gray-100 pt-4 mt-4">
+            <div className="text-xs text-gray-400 truncate mb-2 px-3">{user.email}</div>
+            <button onClick={signOut} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition w-full">
+              <LogOut className="w-4 h-4" />Sign Out
+            </button>
+          </div>
+        )}
       </aside>
 
       <main className="ml-60 p-8">
