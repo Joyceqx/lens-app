@@ -1,43 +1,53 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 
-export async function GET() {
-  try {
-    const supabase = createAdminClient();
+// Always fetch fresh stats, never cache
+export const dynamic = 'force-dynamic';
 
-    // Get persona count
-    const { count: personaCount } = await supabase
+export async function GET() {
+  const supabase = createAdminClient();
+
+  // Each query wrapped individually so one failure doesn't break all stats
+  let personaCount = 0;
+  let sessionCount = 0;
+  let messageCount = 0;
+  let avgLatency = 0;
+
+  try {
+    const { count } = await supabase
       .from('persona_profiles')
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
+    personaCount = count || 0;
+  } catch { /* table may not exist */ }
 
-    // Get total chat sessions
-    const { count: sessionCount } = await supabase
+  try {
+    const { count } = await supabase
       .from('chat_sessions')
       .select('*', { count: 'exact', head: true });
+    sessionCount = count || 0;
+  } catch { /* table may not exist */ }
 
-    // Get total messages
-    const { count: messageCount } = await supabase
+  try {
+    const { count } = await supabase
       .from('messages')
       .select('*', { count: 'exact', head: true });
+    messageCount = count || 0;
+  } catch { /* table may not exist */ }
 
-    // Get avg confidence from query logs
+  try {
     const { data: queryStats } = await supabase
       .from('query_logs')
       .select('latency_ms');
+    if (queryStats && queryStats.length > 0) {
+      avgLatency = Math.round(queryStats.reduce((sum, q) => sum + (q.latency_ms || 0), 0) / queryStats.length);
+    }
+  } catch { /* table may not exist */ }
 
-    const avgLatency = queryStats && queryStats.length > 0
-      ? Math.round(queryStats.reduce((sum, q) => sum + (q.latency_ms || 0), 0) / queryStats.length)
-      : 0;
-
-    return NextResponse.json({
-      total_personas: personaCount || 0,
-      total_sessions: sessionCount || 0,
-      total_messages: messageCount || 0,
-      avg_latency_ms: avgLatency,
-    });
-  } catch (err) {
-    console.error('Dashboard stats error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
+  return NextResponse.json({
+    total_personas: personaCount,
+    total_sessions: sessionCount,
+    total_messages: messageCount,
+    avg_latency_ms: avgLatency,
+  });
 }
