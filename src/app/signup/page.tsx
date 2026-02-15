@@ -22,7 +22,7 @@ function SignupForm() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/dashboard';
+  const next = searchParams.get('next') || '/';
 
   const supabase = createClient();
 
@@ -72,11 +72,14 @@ function SignupForm() {
         <div className="w-full max-w-md text-center">
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
-          <p className="text-white/50 mb-6">
+          <p className="text-white/50 mb-4">
             We sent a confirmation link to <span className="text-white">{email}</span>. Click the link to activate your account.
           </p>
-          <Link href="/login" className="text-accent hover:text-accent-hover transition text-sm">
-            Back to login
+          <p className="text-amber-400/80 text-sm mb-6">
+            Can&apos;t find it? Check your spam or junk folder — it often ends up there.
+          </p>
+          <Link href="/" className="text-accent hover:text-accent-hover transition text-sm">
+            Back to homepage
           </Link>
         </div>
       </div>
