@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase/server';
+import { createAdminClient, getAuthUser } from '@/lib/supabase/server';
 import { chatWithPersona } from '@/lib/claude';
 
 export const maxDuration = 30;
@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminClient();
+    const user = await getAuthUser();
 
     // Fetch persona profile
     const { data: persona, error: personaError } = await supabase
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
           .from('chat_sessions')
           .insert({
             persona_id: personaId,
+            user_id: user?.id || null,
             title: message.slice(0, 100),
           })
           .select('id')
