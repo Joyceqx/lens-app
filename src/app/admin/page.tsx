@@ -99,8 +99,8 @@ export default function AdminPage() {
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: Activity },
-    { label: 'Personas', href: '/personas', icon: Users },
     { label: 'My Personas', href: '/my-personas', icon: UserCircle },
+    { label: 'Persona Library', href: '/personas', icon: Users },
     { label: 'Panel', href: '/panel', icon: BarChart3 },
     { label: 'Admin', href: '/admin', icon: Shield, active: true },
   ];

@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, Users, Activity, ArrowLeft, MessageCircle, BarChart3, UserCircle, Brain, Heart, Compass, User } from 'lucide-react';
+import { Eye, Users, Activity, ArrowLeft, MessageCircle, BarChart3, UserCircle, Brain, Heart, Compass, User, Shield } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { isAdmin } from '@/lib/admin';
 
 export default function PersonaProfilePage() {
+  const { user } = useAuth();
   const params = useParams();
   const id = params.id as string;
   const [persona, setPersona] = useState<any>(null);
@@ -47,9 +50,10 @@ export default function PersonaProfilePage() {
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: Activity },
-    { label: 'Personas', href: '/personas', icon: Users, active: true },
     { label: 'My Personas', href: '/my-personas', icon: UserCircle },
+    { label: 'Persona Library', href: '/personas', icon: Users, active: true },
     { label: 'Panel', href: '/panel', icon: BarChart3 },
+    ...(isAdmin(user?.email) ? [{ label: 'Admin', href: '/admin', icon: Shield }] : []),
   ];
 
   return (
@@ -156,10 +160,46 @@ export default function PersonaProfilePage() {
                 <h2 className="text-sm font-semibold text-gray-900">Demographics</h2>
               </div>
               <div className="space-y-2 text-sm">
+                {demographics.gender && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Gender</span>
+                    <span className="text-gray-700">{demographics.gender}</span>
+                  </div>
+                )}
                 {demographics.age_range && (
                   <div className="flex justify-between">
                     <span className="text-gray-400">Age</span>
                     <span className="text-gray-700">{demographics.age_range}</span>
+                  </div>
+                )}
+                {demographics.ethnicity && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Ethnicity</span>
+                    <span className="text-gray-700">{demographics.ethnicity}</span>
+                  </div>
+                )}
+                {demographics.region && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Region</span>
+                    <span className="text-gray-700">{demographics.region}</span>
+                  </div>
+                )}
+                {demographics.education && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Education</span>
+                    <span className="text-gray-700">{demographics.education}</span>
+                  </div>
+                )}
+                {demographics.income && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Income</span>
+                    <span className="text-gray-700">{demographics.income}</span>
+                  </div>
+                )}
+                {demographics.household && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Household</span>
+                    <span className="text-gray-700">{demographics.household}</span>
                   </div>
                 )}
                 {demographics.life_stage && (
@@ -172,12 +212,6 @@ export default function PersonaProfilePage() {
                   <div className="flex justify-between">
                     <span className="text-gray-400">Location</span>
                     <span className="text-gray-700">{demographics.location_type}</span>
-                  </div>
-                )}
-                {demographics.household && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Household</span>
-                    <span className="text-gray-700">{demographics.household}</span>
                   </div>
                 )}
               </div>

@@ -11,6 +11,7 @@ export const maxDuration = 60;
 const completeSchema = z.object({
   contributor_id: z.string().optional(),
   answers: z.record(z.string(), z.string()).optional(),
+  demographics: z.record(z.string(), z.string()).optional(),
 });
 
 export async function POST(request: Request) {
@@ -79,6 +80,15 @@ export async function POST(request: Request) {
     // Get the authenticated user to link persona to their account
     const user = await getAuthUser();
 
+    // Merge self-reported demographics into extracted attributes
+    const finalAttributes = { ...extraction.attributes };
+    if (validated.demographics && Object.keys(validated.demographics).length > 0) {
+      finalAttributes.demographics = {
+        ...(finalAttributes.demographics || {}),
+        ...validated.demographics,
+      };
+    }
+
     // Save to Supabase and auto-publish so it appears in the library
     let personaId = null;
     try {
@@ -89,7 +99,7 @@ export async function POST(request: Request) {
           contributor_id: validated.contributor_id || null,
           user_id: user?.id || null,
           narrative: extraction.narrative,
-          attributes_json: extraction.attributes,
+          attributes_json: finalAttributes,
           confidence_scores: extraction.confidence_scores,
           published: true,
           version: 1,
@@ -104,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       persona_id: personaId,
       narrative: extraction.narrative,
-      attributes: extraction.attributes,
+      attributes: finalAttributes,
       confidence_scores: extraction.confidence_scores,
       responses_analyzed: enrichedResponses.length,
     });

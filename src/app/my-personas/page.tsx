@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Users, Activity, BarChart3, LogOut, UserCircle, Edit3, Globe, GlobeLock, Trash2, X, Save, Plus } from 'lucide-react';
+import { Eye, Users, Activity, BarChart3, LogOut, UserCircle, Edit3, Globe, GlobeLock, Trash2, X, Save, Plus, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { isAdmin } from '@/lib/admin';
 
 interface Persona {
   id: string;
@@ -109,9 +110,10 @@ export default function MyPersonasPage() {
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: Activity },
-    { label: 'Personas', href: '/personas', icon: Users },
     { label: 'My Personas', href: '/my-personas', icon: UserCircle, active: true },
+    { label: 'Persona Library', href: '/personas', icon: Users },
     { label: 'Panel', href: '/panel', icon: BarChart3 },
+    ...(isAdmin(user?.email) ? [{ label: 'Admin', href: '/admin', icon: Shield }] : []),
   ];
 
   return (

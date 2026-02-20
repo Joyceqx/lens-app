@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Shield, Check, Mic, Type, ChevronRight, ChevronLeft, Star, BarChart2, ArrowRight, Sparkles } from 'lucide-react';
-import { ONBOARDING_QUESTIONS, REWARD_TIERS, PHASES, TOTAL_WEIGHT, TAG_COLORS, COMPARISON_QUESTIONS, COMPARISON_RESPONSES } from '@/lib/constants';
+import { ONBOARDING_QUESTIONS, REWARD_TIERS, TOTAL_WEIGHT, COMPARISON_QUESTIONS, COMPARISON_RESPONSES, DEMOGRAPHIC_FIELDS } from '@/lib/constants';
 
-type Stage = 'consent' | 'privacy' | 'hook' | 'mode' | 'voice' | 'questions' | 'rewards' | 'comparison' | 'final';
+type Stage = 'consent' | 'privacy' | 'hook' | 'demographics' | 'mode' | 'voice' | 'questions' | 'rewards' | 'comparison' | 'final';
 
 function ProgressDots({ current, total }: { current: number; total: number }) {
   return (
@@ -63,6 +63,9 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [personaResult, setPersonaResult] = useState<any>(null);
 
+  // Demographics
+  const [demographics, setDemographics] = useState<Record<string, string>>({});
+
   // Per-question evaluation scores and feedback
   const [scores, setScores] = useState<Record<number, { score: number; max: number; feedback: string }>>({});
   const [evaluating, setEvaluating] = useState(false);
@@ -77,7 +80,6 @@ export default function OnboardingPage() {
   const isRecordingRef = useRef(false);
 
   const question = ONBOARDING_QUESTIONS[qi];
-  const phase = question ? PHASES.find(p => p.name === question.phase) : null;
   const answeredCount = Object.keys(answers).length;
 
   // Enrichment is now based on real evaluation scores
@@ -314,6 +316,7 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           contributor_id: contributorId || undefined,
           answers,
+          demographics: Object.keys(demographics).length > 0 ? demographics : undefined,
         }),
       });
       const data = await res.json();
@@ -408,7 +411,74 @@ export default function OnboardingPage() {
               <h2 className="text-3xl font-bold mb-3">Imagine someone could ask <span className="text-gold">you</span> anything</h2>
               <p className="text-white/60 mb-4 leading-relaxed">About why you buy what you buy. Why you trust certain brands. What keeps you up at night.</p>
               <p className="text-white/60 mb-8 leading-relaxed">That&apos;s what we&apos;re building \u2014 a digital version of your perspective that helps companies make better products <em>for people like you</em>.</p>
-              <button onClick={() => setStage('mode')} className="w-full py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition">I&apos;m Ready <ArrowRight className="w-4 h-4 inline ml-1" /></button>
+              <button onClick={() => setStage('demographics')} className="w-full py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition">I&apos;m Ready <ArrowRight className="w-4 h-4 inline ml-1" /></button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========== DEMOGRAPHICS ========== */}
+        {stage === 'demographics' && (
+          <motion.div key="demographics" {...pv} className="min-h-screen flex items-center justify-center p-6">
+            <div className="max-w-lg w-full">
+              <div className="text-center mb-8">
+                <div className="text-4xl mb-4">{'\u{1F4CB}'}</div>
+                <h2 className="text-2xl font-bold mb-2">Quick Background</h2>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  If you&apos;re comfortable, share a bit about yourself. This helps build a richer persona.
+                  <br />
+                  <span className="text-white/40">Everything is optional — skip what you prefer.</span>
+                </p>
+              </div>
+
+              <div className="space-y-3 mb-8">
+                {DEMOGRAPHIC_FIELDS.map((field) => (
+                  <div key={field.key} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">{field.icon}</span>
+                      <span className="text-sm font-medium text-white/80">{field.label}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {field.options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => {
+                            setDemographics((prev) => {
+                              if (prev[field.key] === option) {
+                                const next = { ...prev };
+                                delete next[field.key];
+                                return next;
+                              }
+                              return { ...prev, [field.key]: option };
+                            });
+                          }}
+                          className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                            demographics[field.key] === option
+                              ? 'bg-gold/20 border-gold/40 text-gold font-medium'
+                              : 'bg-white/5 border-white/10 text-white/60 hover:border-white/30'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStage('mode')}
+                  className="flex-1 py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition"
+                >
+                  {Object.keys(demographics).length > 0 ? 'Continue' : 'Skip & Continue'} <ArrowRight className="w-4 h-4 inline ml-1" />
+                </button>
+              </div>
+
+              {Object.keys(demographics).length > 0 && (
+                <p className="text-center text-xs text-white/30 mt-3">
+                  {Object.keys(demographics).length} of {DEMOGRAPHIC_FIELDS.length} shared
+                </p>
+              )}
             </div>
           </motion.div>
         )}
@@ -453,15 +523,6 @@ export default function OnboardingPage() {
 
             {/* Dark gradient card — matches original design */}
             <div className="max-w-[480px] w-full rounded-3xl p-8 mb-6" style={{ background: 'linear-gradient(160deg, #1a1a2e, #0f3460, #16213e)', boxShadow: '0 12px 48px rgba(15,52,96,0.3)' }}>
-              {/* Phase badge */}
-              {phase && (
-                <div className="flex items-center gap-1.5 justify-center mb-5">
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider" style={{ background: 'rgba(200,169,110,0.12)', color: '#C8A96E' }}>
-                    <span className="text-sm">{phase.icon}</span> {phase.name}
-                  </span>
-                </div>
-              )}
-
               {/* Question text */}
               <p className="text-center text-lg font-medium text-white leading-relaxed mb-2">{question.question}</p>
               <p className="text-center text-xs mb-8" style={{ color: 'rgba(255,255,255,0.4)' }}>{question.hint}</p>
@@ -639,15 +700,9 @@ export default function OnboardingPage() {
                 <div className="flex items-center gap-2"><Star className="w-4 h-4 text-gold" /><span className="text-sm font-medium text-gold">{enrichment}%</span></div>
               </div>
               <ProgressDots current={qi} total={ONBOARDING_QUESTIONS.length} />
-              {phase && <div className="mt-4 flex items-center gap-2 justify-center"><span className="text-lg">{phase.icon}</span><span className="text-xs text-white/40 uppercase tracking-wider">{phase.name}</span></div>}
             </div>
             <div className="flex-1 flex items-center justify-center">
               <div className="max-w-xl w-full">
-                <div className="flex flex-wrap gap-2 mb-4 justify-center">
-                  {question.tags.map((tag) => (
-                    <span key={tag} className="text-xs px-2.5 py-1 rounded-full" style={{ background: (TAG_COLORS as any)[tag]?.bg || 'rgba(255,255,255,0.1)', color: (TAG_COLORS as any)[tag]?.text || 'rgba(255,255,255,0.7)' }}>{tag}</span>
-                  ))}
-                </div>
                 <h2 className="text-2xl font-bold text-center mb-2">{question.question}</h2>
                 <p className="text-sm text-white/40 text-center mb-8">{question.hint}</p>
                 <textarea value={currentAnswer} onChange={(e) => setCurrentAnswer(e.target.value)} placeholder="Share your thoughts..." rows={5} className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/30 resize-none focus:border-gold/50 focus:outline-none transition" />

@@ -1,16 +1,15 @@
 export const ONBOARDING_QUESTIONS = [
-  { id: 1, phase: "Ground" as const, tags: ["DEMOGRAPHIC", "LIFE CONTEXT"], weight: 10, question: "Tell us a little about yourself \u2014 what do you do, and what does a typical week look like for you?", hint: "Your routine, your work, your rhythm." },
-  { id: 2, phase: "Open" as const, tags: ["LIFE CONTEXT", "VALUES"], weight: 10, question: "What\u2019s been taking up most of your time and energy lately \u2014 whether it\u2019s something exciting, stressful, or just all-consuming?", hint: "Exciting, stressful, mundane \u2014 it all counts." },
-  { id: 3, phase: "Open" as const, tags: ["VALUES"], weight: 10, question: "What matters most to you when you think about how you want to live your life? What principles or values do you find yourself coming back to?", hint: "Think big or small \u2014 what guides your decisions?" },
-  { id: 4, phase: "Connect" as const, tags: ["BEHAVIORAL", "VALUES"], weight: 10, question: "When you\u2019re not working, what do you genuinely enjoy spending your time and money on?", hint: "The 'and money' part matters \u2014 what do you actually invest in?" },
-  { id: 5, phase: "Connect" as const, tags: ["BEHAVIORAL"], weight: 10, question: "Think about the last purchase you were really happy with \u2014 what was it, and what made it feel like the right choice?", hint: "A specific story tells us more than a general preference." },
-  { id: 6, phase: "Connect" as const, tags: ["VALUES", "BEHAVIORAL"], weight: 10, question: "Is there something you believe in or care about that actually influences the choices you make \u2014 what you buy, where you spend, who you support?", hint: "If 'not really,' that\u2019s equally valuable." },
-  { id: 7, phase: "Project" as const, tags: ["BEHAVIORAL"], weight: 10, question: "How do you usually discover new products or brands you end up loving? And when you\u2019re deciding between two similar options, what usually tips the scales?", hint: "Friends, algorithms, reviews, gut feeling?" },
-  { id: 8, phase: "Project" as const, tags: ["LIFE CONTEXT", "BEHAVIORAL"], weight: 10, question: "What\u2019s something you\u2019ve been meaning to buy, try, or change in your life but haven\u2019t gotten around to yet?", hint: "The gap between intention and action is interesting." },
-  { id: 9, phase: "Celebrate" as const, tags: ["VALUES", "BEHAVIORAL"], weight: 10, question: "If a close friend asked you to recommend one thing \u2014 a product, a place, an experience, anything \u2014 what would you be most excited to tell them about right now?", hint: "What you recommend reveals what you truly love." },
+  { id: 1, weight: 10, question: "What do you do, and what does a typical week look like for you?", hint: "Your routine, your work, your rhythm." },
+  { id: 2, weight: 10, question: "What\u2019s been taking up most of your time and energy lately?", hint: "Exciting, stressful, mundane \u2014 it all counts." },
+  { id: 3, weight: 10, question: "If you had a free weekend day with no obligations, how would you spend it?", hint: "No budget limits, no responsibilities \u2014 just you." },
+  { id: 4, weight: 10, question: "What\u2019s a recent purchase you were really happy with, and why?", hint: "A specific story tells us more than a general preference." },
+  { id: 5, weight: 10, question: "How do you usually discover new products or brands you end up loving?", hint: "Friends, algorithms, reviews, gut feeling?" },
+  { id: 6, weight: 10, question: "When you\u2019re torn between the cheaper option and the one that feels right, which usually wins?", hint: "Price vs. quality, convenience vs. values, head vs. heart." },
+  { id: 7, weight: 10, question: "What\u2019s something you\u2019ve been meaning to buy, try, or change but haven\u2019t gotten around to yet?", hint: "The gap between intention and action is interesting." },
+  { id: 8, weight: 10, question: "What matters most to you in how you live your life?", hint: "Think big or small \u2014 what guides your choices?" },
 ];
 
-// 9 questions × 10 points each = 90 max
+// 8 questions × 10 points each = 80 max
 export const TOTAL_WEIGHT = ONBOARDING_QUESTIONS.reduce((s, q) => s + q.weight, 0);
 
 export const REWARD_TIERS = [
@@ -19,25 +18,55 @@ export const REWARD_TIERS = [
   { threshold: 95, reward: "$30", profiles: 3, color: "#FFD700", name: "Gold", icon: "\u{1F3C6}" },
 ];
 
-export const PHASES = [
-  { name: "Ground", icon: "\u25C9", desc: "Getting to know you" },
-  { name: "Open", icon: "\u25CE", desc: "What drives you" },
-  { name: "Connect", icon: "\u25C8", desc: "Values meet behavior" },
-  { name: "Project", icon: "\u25C7", desc: "Looking ahead" },
-  { name: "Celebrate", icon: "\u2605", desc: "Share what you love" },
-];
-
-export const TAG_COLORS: Record<string, { bg: string; text: string }> = {
-  DEMOGRAPHIC: { bg: "#EDE7F6", text: "#5E35B1" },
-  "LIFE CONTEXT": { bg: "#E8F5E9", text: "#2E7D32" },
-  VALUES: { bg: "#FFF3E0", text: "#E65100" },
-  BEHAVIORAL: { bg: "#E3F2FD", text: "#1565C0" },
-};
-
 export const COMPARISON_QUESTIONS = [
   "What\u2019s the best way to spend a rainy Sunday?",
   "Is it better to be brutally honest or diplomatically kind?",
   "What matters more \u2014 freedom or security?",
+];
+
+export const DEMOGRAPHIC_FIELDS = [
+  {
+    key: 'gender',
+    label: 'Gender',
+    icon: '\u{1F464}',
+    options: ['Male', 'Female', 'Non-binary', 'Prefer to self-describe', 'Prefer not to say'],
+  },
+  {
+    key: 'age_range',
+    label: 'Age Range',
+    icon: '\u{1F382}',
+    options: ['18\u201324', '25\u201334', '35\u201344', '45\u201354', '55\u201364', '65+'],
+  },
+  {
+    key: 'ethnicity',
+    label: 'Ethnicity',
+    icon: '\u{1F30D}',
+    options: ['Asian', 'Black / African American', 'Hispanic / Latino', 'Middle Eastern / North African', 'Native American / Indigenous', 'Pacific Islander', 'White / Caucasian', 'Mixed / Multiracial', 'Prefer to self-describe', 'Prefer not to say'],
+  },
+  {
+    key: 'region',
+    label: 'Region',
+    icon: '\u{1F4CD}',
+    options: ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa', 'Oceania'],
+  },
+  {
+    key: 'education',
+    label: 'Education Level',
+    icon: '\u{1F393}',
+    options: ['High school or less', 'Some college', 'Bachelor\u2019s degree', 'Master\u2019s degree', 'Doctorate / Professional', 'Prefer not to say'],
+  },
+  {
+    key: 'income',
+    label: 'Household Income',
+    icon: '\u{1F4B0}',
+    options: ['Under $30k', '$30k\u2013$60k', '$60k\u2013$100k', '$100k\u2013$150k', '$150k+', 'Prefer not to say'],
+  },
+  {
+    key: 'household',
+    label: 'Household',
+    icon: '\u{1F3E0}',
+    options: ['Living alone', 'With partner', 'With family / children', 'With roommates', 'With parents', 'Prefer not to say'],
+  },
 ];
 
 export const COMPARISON_RESPONSES = [

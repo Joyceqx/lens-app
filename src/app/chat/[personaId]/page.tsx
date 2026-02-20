@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, Users, Activity, Send, ArrowLeft, Info, Sparkles, BarChart3 } from 'lucide-react';
+import { Eye, Users, Activity, Send, ArrowLeft, Info, Sparkles, BarChart3, UserCircle } from 'lucide-react';
 
 interface Message { id: string; role: 'user' | 'assistant'; content: string; confidence?: string; explanation?: string; }
 
@@ -64,7 +64,7 @@ export default function ChatPage() {
       <aside className="fixed left-0 top-0 h-screen w-60 bg-white border-r border-gray-100 p-4 flex flex-col z-40">
         <Link href="/" className="flex items-center gap-2 mb-8"><div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><Eye className="w-4 h-4 text-white" /></div><span className="text-lg font-semibold">Lens</span></Link>
         <nav className="flex-1 space-y-1">
-          {[{ label: 'Dashboard', href: '/dashboard', icon: Activity }, { label: 'Personas', href: '/personas', icon: Users }, { label: 'Panel', href: '/panel', icon: BarChart3 }].map((item) => (
+          {[{ label: 'Dashboard', href: '/dashboard', icon: Activity }, { label: 'My Personas', href: '/my-personas', icon: UserCircle }, { label: 'Persona Library', href: '/personas', icon: Users }, { label: 'Panel', href: '/panel', icon: BarChart3 }].map((item) => (
             <Link key={item.label} href={item.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition"><item.icon className="w-4 h-4" />{item.label}</Link>
           ))}
         </nav>

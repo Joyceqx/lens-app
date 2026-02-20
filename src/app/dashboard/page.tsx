@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Eye, Users, MessageSquare, Clock, Activity, ArrowRight, ChevronRight, BarChart3, LogOut, UserCircle } from 'lucide-react';
+import { Eye, Users, MessageSquare, Clock, Activity, ArrowRight, ChevronRight, BarChart3, LogOut, UserCircle, Shield } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
+import { isAdmin } from '@/lib/admin';
 
 interface Stats { total_personas: number; total_sessions: number; total_messages: number; avg_latency_ms: number; }
 
@@ -25,7 +26,7 @@ export default function DashboardPage() {
       <aside className="fixed left-0 top-0 h-screen w-60 bg-white border-r border-gray-100 p-4 flex flex-col z-40">
         <Link href="/" className="flex items-center gap-2 mb-8"><div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><Eye className="w-4 h-4 text-white" /></div><span className="text-lg font-semibold">Lens</span></Link>
         <nav className="flex-1 space-y-1">
-          {[{ label: 'Dashboard', href: '/dashboard', icon: Activity, active: true }, { label: 'Personas', href: '/personas', icon: Users }, { label: 'My Personas', href: '/my-personas', icon: UserCircle }, { label: 'Panel', href: '/panel', icon: BarChart3 }].map((item) => (
+          {[{ label: 'Dashboard', href: '/dashboard', icon: Activity, active: true }, { label: 'My Personas', href: '/my-personas', icon: UserCircle }, { label: 'Persona Library', href: '/personas', icon: Users }, { label: 'Panel', href: '/panel', icon: BarChart3 }, ...(isAdmin(user?.email) ? [{ label: 'Admin', href: '/admin', icon: Shield }] : [])].map((item) => (
             <Link key={item.label} href={item.href} className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${item.active ? 'bg-accent-light text-accent font-medium' : 'text-gray-500 hover:bg-gray-50'}`}><item.icon className="w-4 h-4" />{item.label}</Link>
           ))}
         </nav>
