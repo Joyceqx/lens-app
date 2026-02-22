@@ -35,7 +35,7 @@ export const DEMOGRAPHIC_FIELDS = [
     key: 'age_range',
     label: 'Age Range',
     icon: '\u{1F382}',
-    options: ['18\u201324', '25\u201334', '35\u201344', '45\u201354', '55\u201364', '65+'],
+    options: ['18\u201324', '25\u201334', '35\u201344', '45\u201354', '55\u201364', '65+', 'Prefer to self-describe', 'Prefer not to say'],
   },
   {
     key: 'ethnicity',
@@ -47,25 +47,25 @@ export const DEMOGRAPHIC_FIELDS = [
     key: 'region',
     label: 'Region',
     icon: '\u{1F4CD}',
-    options: ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa', 'Oceania'],
+    options: ['North America', 'Europe', 'Asia Pacific', 'Latin America', 'Middle East & Africa', 'Oceania', 'Prefer to self-describe', 'Prefer not to say'],
   },
   {
     key: 'education',
     label: 'Education Level',
     icon: '\u{1F393}',
-    options: ['High school or less', 'Some college', 'Bachelor\u2019s degree', 'Master\u2019s degree', 'Doctorate / Professional', 'Prefer not to say'],
+    options: ['High school or less', 'Some college', 'Bachelor\u2019s degree', 'Master\u2019s degree', 'Doctorate / Professional', 'Prefer to self-describe', 'Prefer not to say'],
   },
   {
     key: 'income',
     label: 'Household Income',
     icon: '\u{1F4B0}',
-    options: ['Under $30k', '$30k\u2013$60k', '$60k\u2013$100k', '$100k\u2013$150k', '$150k+', 'Prefer not to say'],
+    options: ['Under $30k', '$30k\u2013$60k', '$60k\u2013$100k', '$100k\u2013$150k', '$150k+', 'Prefer to self-describe', 'Prefer not to say'],
   },
   {
     key: 'household',
     label: 'Household',
     icon: '\u{1F3E0}',
-    options: ['Living alone', 'With partner', 'With family / children', 'With roommates', 'With parents', 'Prefer not to say'],
+    options: ['Living alone', 'With partner', 'With family / children', 'With roommates', 'With parents', 'Prefer to self-describe', 'Prefer not to say'],
   },
 ];
 

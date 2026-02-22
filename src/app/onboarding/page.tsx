@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Shield, Check, Mic, Type, ChevronRight, ChevronLeft, Star, BarChart2, ArrowRight, Sparkles } from 'lucide-react';
 import { ONBOARDING_QUESTIONS, REWARD_TIERS, TOTAL_WEIGHT, COMPARISON_QUESTIONS, COMPARISON_RESPONSES, DEMOGRAPHIC_FIELDS } from '@/lib/constants';
 
-type Stage = 'consent' | 'privacy' | 'hook' | 'demographics' | 'mode' | 'voice' | 'questions' | 'rewards' | 'comparison' | 'final';
+type Stage = 'consent' | 'privacy' | 'demographics' | 'mode' | 'voice' | 'questions' | 'rewards' | 'comparison' | 'final';
 
 function ProgressDots({ current, total }: { current: number; total: number }) {
   return (
@@ -65,6 +65,7 @@ export default function OnboardingPage() {
 
   // Demographics
   const [demographics, setDemographics] = useState<Record<string, string>>({});
+  const [selfDescribe, setSelfDescribe] = useState<Record<string, string>>({});
 
   // Per-question evaluation scores and feedback
   const [scores, setScores] = useState<Record<number, { score: number; max: number; feedback: string }>>({});
@@ -316,7 +317,15 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           contributor_id: contributorId || undefined,
           answers,
-          demographics: Object.keys(demographics).length > 0 ? demographics : undefined,
+          demographics: Object.keys(demographics).length > 0
+            ? Object.fromEntries(
+                Object.entries(demographics).map(([k, v]) =>
+                  v === 'Prefer to self-describe' && selfDescribe[k]?.trim()
+                    ? [k, selfDescribe[k].trim()]
+                    : [k, v]
+                )
+              )
+            : undefined,
         }),
       });
       const data = await res.json();
@@ -398,20 +407,7 @@ export default function OnboardingPage() {
                   </div>
                 ))}
               </div>
-              <button onClick={() => setStage('hook')} className="w-full py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition">Got It, Let&apos;s Go</button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ========== HOOK ========== */}
-        {stage === 'hook' && (
-          <motion.div key="hook" {...pv} className="min-h-screen flex items-center justify-center p-6">
-            <div className="max-w-md w-full text-center">
-              <div className="text-6xl mb-6">&#x1F52E;</div>
-              <h2 className="text-3xl font-bold mb-3">Imagine someone could ask <span className="text-gold">you</span> anything</h2>
-              <p className="text-white/60 mb-4 leading-relaxed">About why you buy what you buy. Why you trust certain brands. What keeps you up at night.</p>
-              <p className="text-white/60 mb-8 leading-relaxed">That&apos;s what we&apos;re building \u2014 a digital version of your perspective that helps companies make better products <em>for people like you</em>.</p>
-              <button onClick={() => setStage('demographics')} className="w-full py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition">I&apos;m Ready <ArrowRight className="w-4 h-4 inline ml-1" /></button>
+              <button onClick={() => setStage('demographics')} className="w-full py-3.5 rounded-xl bg-gold text-navy font-semibold hover:bg-gold-light transition">Got It, Let&apos;s Go</button>
             </div>
           </motion.div>
         )}
@@ -446,7 +442,15 @@ export default function OnboardingPage() {
                               if (prev[field.key] === option) {
                                 const next = { ...prev };
                                 delete next[field.key];
+                                // Clear self-describe text if deselecting
+                                if (option === 'Prefer to self-describe') {
+                                  setSelfDescribe((sd) => { const n = { ...sd }; delete n[field.key]; return n; });
+                                }
                                 return next;
+                              }
+                              // If selecting self-describe, clear any previous self-describe text
+                              if (option !== 'Prefer to self-describe') {
+                                setSelfDescribe((sd) => { const n = { ...sd }; delete n[field.key]; return n; });
                               }
                               return { ...prev, [field.key]: option };
                             });
@@ -461,6 +465,15 @@ export default function OnboardingPage() {
                         </button>
                       ))}
                     </div>
+                    {demographics[field.key] === 'Prefer to self-describe' && (
+                      <input
+                        type="text"
+                        placeholder={`Describe your ${field.label.toLowerCase()}...`}
+                        value={selfDescribe[field.key] || ''}
+                        onChange={(e) => setSelfDescribe((prev) => ({ ...prev, [field.key]: e.target.value }))}
+                        className="mt-3 w-full px-3 py-2 bg-white/5 border border-white/20 rounded-lg text-sm text-white placeholder-white/30 focus:border-gold/50 focus:outline-none transition"
+                      />
+                    )}
                   </div>
                 ))}
               </div>
