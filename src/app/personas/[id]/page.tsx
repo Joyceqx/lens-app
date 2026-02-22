@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, Users, Activity, ArrowLeft, MessageCircle, BarChart3, UserCircle, Brain, Heart, Compass, User, Shield } from 'lucide-react';
+import { Eye, Users, Activity, ArrowLeft, MessageCircle, BarChart3, UserCircle, Brain, Heart, Compass, User, Shield, Star } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { isAdmin } from '@/lib/admin';
 
@@ -146,6 +146,22 @@ export default function PersonaProfilePage() {
                   }`}
                 >
                   {Math.round(confidence.overall * 100)}%
+                </span>
+              </div>
+            )}
+
+            {/* Fidelity score */}
+            {confidence.fidelity_score !== undefined && confidence.fidelity_score !== null && (
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs text-gray-400 flex items-center gap-1"><Star className="w-3 h-3" /> Fidelity</span>
+                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden max-w-xs">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 bg-amber-400"
+                    style={{ width: `${confidence.fidelity_score * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">
+                  {Math.round(confidence.fidelity_score * 100)}%
                 </span>
               </div>
             )}

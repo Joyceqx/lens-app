@@ -59,6 +59,7 @@ export default function OnboardingPage() {
   const [compPhase, setCompPhase] = useState<'question' | 'responses'>('question');
   const [personalResponses, setPersonalResponses] = useState<string[] | null>(null);
   const [loadingComparison, setLoadingComparison] = useState(false);
+  const [compRatings, setCompRatings] = useState<Record<number, number>>({});
   const [contributorId, setContributorId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [personaResult, setPersonaResult] = useState<any>(null);
@@ -325,6 +326,9 @@ export default function OnboardingPage() {
                     : [k, v]
                 )
               )
+            : undefined,
+          fidelity_score: Object.keys(compRatings).length > 0
+            ? Object.values(compRatings).reduce((a, b) => a + b, 0) / (Object.keys(compRatings).length * 5)
             : undefined,
         }),
       });
@@ -791,13 +795,41 @@ export default function OnboardingPage() {
                       ) : (
                         <p className="text-sm text-white/50 italic">Could not generate — answer more questions for better results</p>
                       )}
+                      {/* Star rating */}
+                      {!loadingComparison && (
+                        <div className="mt-3 pt-3 border-t border-gold/20">
+                          <p className="text-xs text-white/50 mb-2">How well does this represent you?</p>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                onClick={() => setCompRatings((prev) => ({ ...prev, [compQi]: star }))}
+                                className="transition-transform hover:scale-110"
+                              >
+                                <Star
+                                  className={`w-6 h-6 transition-colors ${
+                                    (compRatings[compQi] || 0) >= star
+                                      ? 'text-gold fill-gold'
+                                      : 'text-white/20'
+                                  }`}
+                                />
+                              </button>
+                            ))}
+                            {compRatings[compQi] && (
+                              <span className="text-xs text-white/40 ml-2">
+                                {compRatings[compQi]}/5
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3">
                     {compQi < COMPARISON_QUESTIONS.length - 1 ? (
-                      <button onClick={() => { setCompQi(compQi + 1); setCompPhase('question'); }} className="flex-1 py-3 rounded-xl bg-gold text-navy font-medium hover:bg-gold-light transition">Next Comparison</button>
+                      <button onClick={() => { setCompQi(compQi + 1); setCompPhase('question'); }} disabled={!compRatings[compQi]} className={`flex-1 py-3 rounded-xl font-medium transition ${compRatings[compQi] ? 'bg-gold text-navy hover:bg-gold-light' : 'bg-white/10 text-white/30 cursor-not-allowed'}`}>Next Comparison</button>
                     ) : (
-                      <button onClick={async () => { await completeOnboarding(); setStage('final'); }} disabled={isSubmitting} className="flex-1 py-3 rounded-xl bg-gold text-navy font-medium hover:bg-gold-light transition disabled:opacity-50">{isSubmitting ? 'Building your persona...' : 'See Your Results'}</button>
+                      <button onClick={async () => { await completeOnboarding(); setStage('final'); }} disabled={isSubmitting || !compRatings[compQi]} className={`flex-1 py-3 rounded-xl font-medium transition ${!compRatings[compQi] ? 'bg-white/10 text-white/30 cursor-not-allowed' : 'bg-gold text-navy hover:bg-gold-light disabled:opacity-50'}`}>{isSubmitting ? 'Building your persona...' : 'See Your Results'}</button>
                     )}
                   </div>
                 </div>
@@ -846,9 +878,12 @@ export default function OnboardingPage() {
                       )}
                     </div>
                   )}
-                  <div className="grid grid-cols-3 gap-3 mb-8">
+                  <div className="grid grid-cols-4 gap-3 mb-8">
                     <div className="bg-white/5 rounded-xl p-3"><div className="text-2xl font-bold text-gold">{answeredCount}</div><div className="text-xs text-white/40">Answered</div></div>
                     <div className="bg-white/5 rounded-xl p-3"><div className="text-2xl font-bold text-gold">{enrichment}%</div><div className="text-xs text-white/40">Enrichment</div></div>
+                    {personaResult?.confidence_scores?.fidelity_score !== undefined && (
+                      <div className="bg-white/5 rounded-xl p-3"><div className="text-2xl font-bold text-gold flex items-center justify-center gap-1"><Star className="w-4 h-4 fill-gold" />{Math.round(personaResult.confidence_scores.fidelity_score * 100)}%</div><div className="text-xs text-white/40">Fidelity</div></div>
+                    )}
                     <div className="bg-white/5 rounded-xl p-3"><div className="text-2xl font-bold text-gold">{currentTier?.icon || '\u{1F4CA}'}</div><div className="text-xs text-white/40">{currentTier?.name || 'Starter'}</div></div>
                   </div>
                   {personaResult?.confidence_scores?.overall && (

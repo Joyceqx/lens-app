@@ -12,6 +12,7 @@ const completeSchema = z.object({
   contributor_id: z.string().optional(),
   answers: z.record(z.string(), z.string()).optional(),
   demographics: z.record(z.string(), z.string()).optional(),
+  fidelity_score: z.number().min(0).max(1).optional(),
 });
 
 export async function POST(request: Request) {
@@ -89,6 +90,12 @@ export async function POST(request: Request) {
       };
     }
 
+    // Merge fidelity score into confidence scores
+    const finalConfidence: Record<string, number> = { ...extraction.confidence_scores };
+    if (validated.fidelity_score !== undefined) {
+      finalConfidence.fidelity_score = validated.fidelity_score;
+    }
+
     // Save to Supabase and auto-publish so it appears in the library
     let personaId = null;
     try {
@@ -100,7 +107,7 @@ export async function POST(request: Request) {
           user_id: user?.id || null,
           narrative: extraction.narrative,
           attributes_json: finalAttributes,
-          confidence_scores: extraction.confidence_scores,
+          confidence_scores: finalConfidence,
           published: true,
           version: 1,
         })
@@ -115,7 +122,7 @@ export async function POST(request: Request) {
       persona_id: personaId,
       narrative: extraction.narrative,
       attributes: finalAttributes,
-      confidence_scores: extraction.confidence_scores,
+      confidence_scores: finalConfidence,
       responses_analyzed: enrichedResponses.length,
     });
   } catch (err: any) {
